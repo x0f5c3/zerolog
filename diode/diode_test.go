@@ -19,8 +19,8 @@ func TestNewWriter(t *testing.T) {
 	w := diode.NewWriter(&buf, 1000, 0, func(missed int) {
 		fmt.Printf("Dropped %d messages\n", missed)
 	})
-	log := zerolog.New(w)
-	log.Print("test")
+	l := zerolog.New(w)
+	l.Print("test")
 
 	w.Close()
 	want := "{\"level\":\"debug\",\"message\":\"test\"}\n"

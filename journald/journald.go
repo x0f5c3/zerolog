@@ -19,12 +19,14 @@ package journald
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
 
+	"github.com/goccy/go-json"
+
 	"github.com/coreos/go-systemd/v22/journal"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/internal/cbor"
 )

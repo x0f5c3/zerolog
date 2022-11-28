@@ -1,11 +1,12 @@
 package zerolog
 
 import (
-	"encoding/json"
 	"net"
 	"sort"
 	"time"
 	"unsafe"
+
+	"github.com/goccy/go-json"
 )
 
 func isNilValue(i interface{}) bool {
