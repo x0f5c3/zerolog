@@ -15,8 +15,8 @@ import (
 	"testing"
 
 	"github.com/rs/xid"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/internal/cbor"
+	"github.com/x0f5c3/zerolog"
+	"github.com/x0f5c3/zerolog/internal/cbor"
 )
 
 func decodeIfBinary(out *bytes.Buffer) string {

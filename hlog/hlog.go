@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/rs/xid"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/hlog/internal/mutil"
-	"github.com/rs/zerolog/log"
+	"github.com/x0f5c3/zerolog"
+	"github.com/x0f5c3/zerolog/hlog/internal/mutil"
+	"github.com/x0f5c3/zerolog/log"
 )
 
 // FromRequest gets the logger in the request's context.

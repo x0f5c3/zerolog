@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog"
+	"github.com/x0f5c3/zerolog"
 )
 
 func TestLogStack(t *testing.T) {

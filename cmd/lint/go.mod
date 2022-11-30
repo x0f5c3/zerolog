@@ -1,4 +1,4 @@
-module github.com/rs/zerolog/cmd/lint
+module github.com/x0f5c3/zerolog/cmd/lint
 
 go 1.15
 
