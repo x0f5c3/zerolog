@@ -17,6 +17,7 @@ import (
 	"github.com/mattn/go-colorable"
 )
 
+//goland:noinspection GoUnusedConst
 const (
 	colorBlack = iota + 30
 	colorRed
@@ -238,9 +239,9 @@ func (w ConsoleWriter) writeFields(evt map[string]interface{}, buf *bytes.Buffer
 		default:
 			b, err := InterfaceMarshalFunc(fValue)
 			if err != nil {
-				fmt.Fprintf(buf, colorize("[error: %v]", colorRed, w.NoColor), err)
+				_, _ = fmt.Fprintf(buf, colorize("[error: %v]", colorRed, w.NoColor), err)
 			} else {
-				fmt.Fprint(buf, fv(b))
+				_, _ = fmt.Fprint(buf, fv(b))
 			}
 		}
 

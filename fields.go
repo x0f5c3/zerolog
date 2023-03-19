@@ -35,6 +35,7 @@ func appendFields(dst []byte, fields interface{}) []byte {
 	return dst
 }
 
+//goland:noinspection GoBoolExpressions,GoBoolExpressions,GoBoolExpressions
 func appendFieldList(dst []byte, kvList []interface{}) []byte {
 	for i, n := 0, len(kvList); i < n; i += 2 {
 		key, val := kvList[i], kvList[i+1]

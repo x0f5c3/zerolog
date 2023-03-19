@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"net"
+	"reflect"
 )
 
 // AppendNil inserts a 'Nil' object into the dst byte array.
@@ -40,7 +41,7 @@ func (Encoder) AppendArrayEnd(dst []byte) []byte {
 
 // AppendArrayDelim adds markers to indicate end of a particular array element.
 func (Encoder) AppendArrayDelim(dst []byte) []byte {
-	//No delimiters needed in cbor
+	// No delimiters needed in cbor
 	return dst
 }
 
@@ -436,6 +437,14 @@ func (e Encoder) AppendInterface(dst []byte, i interface{}) []byte {
 		return e.AppendString(dst, fmt.Sprintf("marshaling error: %v", err))
 	}
 	return AppendEmbeddedJSON(dst, marshaled)
+}
+
+// AppendType appends the parameter type (as a string) to the input byte slice.
+func (e Encoder) AppendType(dst []byte, i interface{}) []byte {
+	if i == nil {
+		return e.AppendString(dst, "<nil>")
+	}
+	return e.AppendString(dst, reflect.TypeOf(i).String())
 }
 
 // AppendIPAddr encodes and inserts an IP Address (IPv4 or IPv6).

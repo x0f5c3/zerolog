@@ -1,5 +1,4 @@
 //go:build !binary_log && !windows
-// +build !binary_log,!windows
 
 package zerolog
 
@@ -42,7 +41,7 @@ func (c mockedWriter) Write(p []byte) (int, error) {
 	writeCalls++
 
 	if c.wantErr {
-		return -1, errors.New("Expected error")
+		return -1, errors.New("expected error")
 	}
 
 	return len(p), nil

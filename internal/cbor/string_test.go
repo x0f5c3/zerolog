@@ -8,7 +8,7 @@ import (
 var encodeStringTests = []struct {
 	plain  string
 	binary string
-	json   string //begin and end quotes are implied
+	json   string // begin and end quotes are implied
 }{
 	{"", "\x60", ""},
 	{"\\", "\x61\x5c", "\\\\"},
@@ -64,10 +64,10 @@ func TestAppendString(t *testing.T) {
 			t.Errorf("appendString(%q) = %#q, want %#q", tt.plain, got, want)
 		}
 	}
-	//Test a large string > 65535 length
+	// Test a large string > 65535 length
 
 	var buffer bytes.Buffer
-	for i := 0; i < 0x00011170; i++ { //70,000 character string
+	for i := 0; i < 0x00011170; i++ { // 70,000 character string
 		buffer.WriteString("a")
 	}
 	inp := buffer.String()
@@ -85,10 +85,10 @@ func TestAppendBytes(t *testing.T) {
 			t.Errorf("appendString(%q) = %#q, want %#q", tt.plain, got, want)
 		}
 	}
-	//Test a large string > 65535 length
+	// Test a large string > 65535 length
 
-	inp := []byte{}
-	for i := 0; i < 0x00011170; i++ { //70,000 character string
+	var inp []byte
+	for i := 0; i < 0x00011170; i++ { // 70,000 character string
 		inp = append(inp, byte('a'))
 	}
 	want := "\x5a\x00\x01\x11\x70" + string(inp)

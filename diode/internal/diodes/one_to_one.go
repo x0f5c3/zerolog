@@ -41,6 +41,8 @@ type OneToOne struct {
 // a single writer. The alerter is invoked on the read's go-routine. It is
 // called when it notices that the writer go-routine has passed it and wrote
 // over data. A nil can be used to ignore alerts.
+//
+//goland:noinspection GoUnusedExportedFunction
 func NewOneToOne(size int, alerter Alerter) *OneToOne {
 	if alerter == nil {
 		alerter = AlertFunc(func(int) {})

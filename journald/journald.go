@@ -1,5 +1,4 @@
 //go:build !windows
-// +build !windows
 
 // Package journald provides a io.Writer to send the logs
 // to journalD component of systemd.

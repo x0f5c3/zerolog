@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/x0f5c3/zerolog/internal/utils"
+	"github.com/x0f5c3/zerolog/log"
 	"golang.org/x/tools/go/loader"
 )
 
@@ -33,7 +35,10 @@ func init() {
 	recursivelyIgnoredPkgs = append(recursivelyIgnoredPkgs, "github.com/x0f5c3/zerolog")
 	args := flag.Args()
 	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "you must provide exactly one package path")
+		_, err := fmt.Fprintln(os.Stderr, "you must provide exactly one package path")
+		if err != nil {
+			log.Error().Err(err).Msg("You must provice exactly one package path")
+		}
 		os.Exit(1)
 	}
 	rootPkg = args[0]

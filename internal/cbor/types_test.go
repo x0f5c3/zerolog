@@ -284,7 +284,7 @@ func BenchmarkAppendInt(b *testing.B) {
 				case 23:
 					_ = enc.AppendInt32(buf, int32(str.val))
 				case 24:
-					_ = enc.AppendInt64(buf, int64(str.val))
+					_ = enc.AppendInt64(buf, str.val)
 				}
 			}
 		})

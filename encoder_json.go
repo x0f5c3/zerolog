@@ -1,4 +1,4 @@
-// +build !binary_log
+//go:build !binary_log
 
 package zerolog
 
@@ -17,7 +17,7 @@ var (
 
 func init() {
 	// using closure to reflect the changes at runtime.
-	json.JSONMarshalFunc = func(v interface{}) ([]byte, error) {
+	json.MarshalFunc = func(v interface{}) ([]byte, error) {
 		return InterfaceMarshalFunc(v)
 	}
 }

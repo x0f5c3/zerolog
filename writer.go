@@ -21,6 +21,7 @@ type levelWriterAdapter struct {
 	io.Writer
 }
 
+//goland:noinspection GoUnusedParameter
 func (lw levelWriterAdapter) WriteLevel(l Level, p []byte) (n int, err error) {
 	return lw.Write(p)
 }
@@ -34,6 +35,8 @@ type syncWriter struct {
 // This syncer can be used to wrap the call to writer's Write method if it is
 // not thread safe. Note that you do not need this wrapper for os.File Write
 // operations on POSIX and Windows systems as they are already thread-safe.
+//
+//goland:noinspection GoUnusedExportedFunction
 func SyncWriter(w io.Writer) io.Writer {
 	if lw, ok := w.(LevelWriter); ok {
 		return &syncWriter{lw: lw}
@@ -118,6 +121,8 @@ type TestWriter struct {
 }
 
 // NewTestWriter creates a writer that logs to the testing.TB.
+//
+//goland:noinspection GoUnusedExportedFunction
 func NewTestWriter(t TestingLog) TestWriter {
 	return TestWriter{T: t}
 }

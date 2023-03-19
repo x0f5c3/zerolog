@@ -10,11 +10,30 @@ import (
 	"github.com/x0f5c3/zerolog"
 )
 
+func HandleErr(err error, msg string, writeFunc ...func(error, string)) {
+	f := func() func(error, string) {
+		if len(writeFunc) > 0 {
+			return writeFunc[0]
+		} else {
+			return defaultErrWrite
+		}
+	}()
+	if err != nil {
+		f(err, msg)
+	}
+}
+
+func defaultErrWrite(err error, msg string) {
+	Error().Err(err).Msg(msg)
+}
+
 // Logger is the global logger.
 var Logger = zerolog.New(os.Stderr).With().Timestamp().Logger()
 
 // Output duplicates the global logger and sets w as its output.
-func Output(w io.Writer) zerolog.Logger {
+//
+//goland:noinspection GoUnusedExportedFunction
+func Output(w io.Writer) *zerolog.Logger {
 	return Logger.Output(w)
 }
 
@@ -24,17 +43,21 @@ func With() zerolog.Context {
 }
 
 // Level creates a child logger with the minimum accepted level set to level.
-func Level(level zerolog.Level) zerolog.Logger {
+//
+//goland:noinspection GoUnusedExportedFunction
+func Level(level zerolog.Level) *zerolog.Logger {
 	return Logger.Level(level)
 }
 
 // Sample returns a logger with the s sampler.
-func Sample(s zerolog.Sampler) zerolog.Logger {
+//
+//goland:noinspection GoUnusedExportedFunction
+func Sample(s zerolog.Sampler) *zerolog.Logger {
 	return Logger.Sample(s)
 }
 
 // Hook returns a logger with the h Hook.
-func Hook(h zerolog.Hook) zerolog.Logger {
+func Hook(h zerolog.Hook) *zerolog.Logger {
 	return Logger.Hook(h)
 }
 
@@ -93,6 +116,8 @@ func Fatal() *zerolog.Event {
 // to the panic function.
 //
 // You must call Msg on the returned event in order to send the event.
+//
+//goland:noinspection GoUnusedExportedFunction
 func Panic() *zerolog.Event {
 	return Logger.Panic()
 }
@@ -100,6 +125,8 @@ func Panic() *zerolog.Event {
 // WithLevel starts a new message with level.
 //
 // You must call Msg on the returned event in order to send the event.
+//
+//goland:noinspection GoUnusedExportedFunction
 func WithLevel(level zerolog.Level) *zerolog.Event {
 	return Logger.WithLevel(level)
 }

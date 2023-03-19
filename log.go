@@ -2,97 +2,96 @@
 //
 // A global Logger can be use for simple logging:
 //
-//     import "github.com/x0f5c3/zerolog/log"
+//	import "github.com/x0f5c3/zerolog/log"
 //
-//     log.Info().Msg("hello world")
-//     // Output: {"time":1494567715,"level":"info","message":"hello world"}
+//	log.Info().Msg("hello world")
+//	// Output: {"time":1494567715,"level":"info","message":"hello world"}
 //
 // NOTE: To import the global logger, import the "log" subpackage "github.com/x0f5c3/zerolog/log".
 //
 // Fields can be added to log messages:
 //
-//     log.Info().Str("foo", "bar").Msg("hello world")
-//     // Output: {"time":1494567715,"level":"info","message":"hello world","foo":"bar"}
+//	log.Info().Str("foo", "bar").Msg("hello world")
+//	// Output: {"time":1494567715,"level":"info","message":"hello world","foo":"bar"}
 //
 // Create logger instance to manage different outputs:
 //
-//     logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
-//     logger.Info().
-//            Str("foo", "bar").
-//            Msg("hello world")
-//     // Output: {"time":1494567715,"level":"info","message":"hello world","foo":"bar"}
+//	logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
+//	logger.Info().
+//	       Str("foo", "bar").
+//	       Msg("hello world")
+//	// Output: {"time":1494567715,"level":"info","message":"hello world","foo":"bar"}
 //
 // Sub-loggers let you chain loggers with additional context:
 //
-//     sublogger := log.With().Str("component": "foo").Logger()
-//     sublogger.Info().Msg("hello world")
-//     // Output: {"time":1494567715,"level":"info","message":"hello world","component":"foo"}
+//	sublogger := log.With().Str("component": "foo").Logger()
+//	sublogger.Info().Msg("hello world")
+//	// Output: {"time":1494567715,"level":"info","message":"hello world","component":"foo"}
 //
 // Level logging
 //
-//     zerolog.SetGlobalLevel(zerolog.InfoLevel)
+//	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 //
-//     log.Debug().Msg("filtered out message")
-//     log.Info().Msg("routed message")
+//	log.Debug().Msg("filtered out message")
+//	log.Info().Msg("routed message")
 //
-//     if e := log.Debug(); e.Enabled() {
-//         // Compute log output only if enabled.
-//         value := compute()
-//         e.Str("foo": value).Msg("some debug message")
-//     }
-//     // Output: {"level":"info","time":1494567715,"routed message"}
+//	if e := log.Debug(); e.Enabled() {
+//	    // Compute log output only if enabled.
+//	    value := compute()
+//	    e.Str("foo": value).Msg("some debug message")
+//	}
+//	// Output: {"level":"info","time":1494567715,"routed message"}
 //
 // Customize automatic field names:
 //
-//     log.TimestampFieldName = "t"
-//     log.LevelFieldName = "p"
-//     log.MessageFieldName = "m"
+//	log.TimestampFieldName = "t"
+//	log.LevelFieldName = "p"
+//	log.MessageFieldName = "m"
 //
-//     log.Info().Msg("hello world")
-//     // Output: {"t":1494567715,"p":"info","m":"hello world"}
+//	log.Info().Msg("hello world")
+//	// Output: {"t":1494567715,"p":"info","m":"hello world"}
 //
 // Log with no level and message:
 //
-//     log.Log().Str("foo","bar").Msg("")
-//     // Output: {"time":1494567715,"foo":"bar"}
+//	log.Log().Str("foo","bar").Msg("")
+//	// Output: {"time":1494567715,"foo":"bar"}
 //
 // Add contextual fields to global Logger:
 //
-//     log.Logger = log.With().Str("foo", "bar").Logger()
+//	log.Logger = log.With().Str("foo", "bar").Logger()
 //
 // Sample logs:
 //
-//     sampled := log.Sample(&zerolog.BasicSampler{N: 10})
-//     sampled.Info().Msg("will be logged every 10 messages")
+//	sampled := log.Sample(&zerolog.BasicSampler{N: 10})
+//	sampled.Info().Msg("will be logged every 10 messages")
 //
 // Log with contextual hooks:
 //
-//     // Create the hook:
-//     type SeverityHook struct{}
+//	// Create the hook:
+//	type SeverityHook struct{}
 //
-//     func (h SeverityHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
-//          if level != zerolog.NoLevel {
-//              e.Str("severity", level.String())
-//          }
-//     }
+//	func (h SeverityHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
+//	     if level != zerolog.NoLevel {
+//	         e.Str("severity", level.String())
+//	     }
+//	}
 //
-//     // And use it:
-//     var h SeverityHook
-//     log := zerolog.New(os.Stdout).Hook(h)
-//     log.Warn().Msg("")
-//     // Output: {"level":"warn","severity":"warn"}
+//	// And use it:
+//	var h SeverityHook
+//	log := zerolog.New(os.Stdout).Hook(h)
+//	log.Warn().Msg("")
+//	// Output: {"level":"warn","severity":"warn"}
 //
-//
-// Caveats
+// # Caveats
 //
 // There is no fields deduplication out-of-the-box.
 // Using the same key multiple times creates new key in final JSON each time.
 //
-//     logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
-//     logger.Info().
-//            Timestamp().
-//            Msg("dup")
-//     // Output: {"level":"info","time":1494567715,"time":1494567715,"message":"dup"}
+//	logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
+//	logger.Info().
+//	       Timestamp().
+//	       Msg("dup")
+//	// Output: {"level":"info","time":1494567715,"time":1494567715,"message":"dup"}
 //
 // In this case, many consumers will take the last value,
 // but this is not guaranteed; check yours if in doubt.
@@ -102,7 +101,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -134,8 +132,8 @@ const (
 	// Values less than TraceLevel are handled as numbers.
 )
 
-func (l Level) String() string {
-	switch l {
+func (l *Level) String() string {
+	switch *l {
 	case TraceLevel:
 		return LevelTraceValue
 	case DebugLevel:
@@ -155,35 +153,35 @@ func (l Level) String() string {
 	case NoLevel:
 		return ""
 	}
-	return strconv.Itoa(int(l))
+	return strconv.Itoa(int(*l))
 }
 
 // ParseLevel converts a level string into a zerolog Level value.
 // returns an error if the input string does not match known values.
 func ParseLevel(levelStr string) (Level, error) {
-	switch strings.ToLower(levelStr) {
-	case LevelFieldMarshalFunc(TraceLevel):
+	switch {
+	case strings.EqualFold(levelStr, LevelFieldMarshalFunc(TraceLevel)):
 		return TraceLevel, nil
-	case LevelFieldMarshalFunc(DebugLevel):
+	case strings.EqualFold(levelStr, LevelFieldMarshalFunc(DebugLevel)):
 		return DebugLevel, nil
-	case LevelFieldMarshalFunc(InfoLevel):
+	case strings.EqualFold(levelStr, LevelFieldMarshalFunc(InfoLevel)):
 		return InfoLevel, nil
-	case LevelFieldMarshalFunc(WarnLevel):
+	case strings.EqualFold(levelStr, LevelFieldMarshalFunc(WarnLevel)):
 		return WarnLevel, nil
-	case LevelFieldMarshalFunc(ErrorLevel):
+	case strings.EqualFold(levelStr, LevelFieldMarshalFunc(ErrorLevel)):
 		return ErrorLevel, nil
-	case LevelFieldMarshalFunc(FatalLevel):
+	case strings.EqualFold(levelStr, LevelFieldMarshalFunc(FatalLevel)):
 		return FatalLevel, nil
-	case LevelFieldMarshalFunc(PanicLevel):
+	case strings.EqualFold(levelStr, LevelFieldMarshalFunc(PanicLevel)):
 		return PanicLevel, nil
-	case LevelFieldMarshalFunc(Disabled):
+	case strings.EqualFold(levelStr, LevelFieldMarshalFunc(Disabled)):
 		return Disabled, nil
-	case LevelFieldMarshalFunc(NoLevel):
+	case strings.EqualFold(levelStr, LevelFieldMarshalFunc(NoLevel)):
 		return NoLevel, nil
 	}
 	i, err := strconv.Atoi(levelStr)
 	if err != nil {
-		return NoLevel, fmt.Errorf("Unknown Level String: '%s', defaulting to NoLevel", levelStr)
+		return NoLevel, fmt.Errorf("unknown Level String: '%s', defaulting to NoLevel", levelStr)
 	}
 	if i > 127 || i < -128 {
 		return NoLevel, fmt.Errorf("Out-Of-Bounds Level: '%d', defaulting to NoLevel", i)
@@ -202,8 +200,8 @@ func (l *Level) UnmarshalText(text []byte) error {
 }
 
 // MarshalText implements encoding.TextMarshaler to allow for easy writing into toml/yaml/json formats
-func (l Level) MarshalText() ([]byte, error) {
-	return []byte(LevelFieldMarshalFunc(l)), nil
+func (l *Level) MarshalText() ([]byte, error) {
+	return []byte(LevelFieldMarshalFunc(*l)), nil
 }
 
 // A Logger represents an active logging object that generates lines
@@ -227,24 +225,24 @@ type Logger struct {
 // Each logging operation makes a single call to the Writer's Write method. There is no
 // guarantee on access serialization to the Writer. If your Writer is not thread safe,
 // you may consider using sync wrapper.
-func New(w io.Writer) Logger {
+func New(w io.Writer) *Logger {
 	if w == nil {
-		w = ioutil.Discard
+		w = io.Discard
 	}
 	lw, ok := w.(LevelWriter)
 	if !ok {
 		lw = levelWriterAdapter{w}
 	}
-	return Logger{w: lw, level: TraceLevel}
+	return &Logger{w: lw, level: TraceLevel}
 }
 
 // Nop returns a disabled logger for which all operation are no-op.
-func Nop() Logger {
+func Nop() *Logger {
 	return New(nil).Level(Disabled)
 }
 
 // Output duplicates the current logger and sets w as its output.
-func (l Logger) Output(w io.Writer) Logger {
+func (l *Logger) Output(w io.Writer) *Logger {
 	l2 := New(w)
 	l2.level = l.level
 	l2.sampler = l.sampler
@@ -260,7 +258,7 @@ func (l Logger) Output(w io.Writer) Logger {
 }
 
 // With creates a child logger with the field added to its context.
-func (l Logger) With() Context {
+func (l *Logger) With() Context {
 	context := l.context
 	l.context = make([]byte, 0, 500)
 	if context != nil {
@@ -286,29 +284,29 @@ func (l *Logger) UpdateContext(update func(c Context) Context) {
 	if len(l.context) == 0 {
 		l.context = enc.AppendBeginMarker(l.context)
 	}
-	c := update(Context{*l})
+	c := update(Context{l})
 	l.context = c.l.context
 }
 
 // Level creates a child logger with the minimum accepted level set to level.
-func (l Logger) Level(lvl Level) Logger {
+func (l *Logger) Level(lvl Level) *Logger {
 	l.level = lvl
 	return l
 }
 
 // GetLevel returns the current Level of l.
-func (l Logger) GetLevel() Level {
+func (l *Logger) GetLevel() Level {
 	return l.level
 }
 
 // Sample returns a logger with the s sampler.
-func (l Logger) Sample(s Sampler) Logger {
+func (l *Logger) Sample(s Sampler) *Logger {
 	l.sampler = s
 	return l
 }
 
 // Hook returns a logger with the h Hook.
-func (l Logger) Hook(h Hook) Logger {
+func (l *Logger) Hook(h Hook) *Logger {
 	l.hooks = append(l.hooks, h)
 	return l
 }
@@ -432,7 +430,7 @@ func (l *Logger) Printf(format string, v ...interface{}) {
 
 // Write implements the io.Writer interface. This is useful to set as a writer
 // for the standard library log.
-func (l Logger) Write(p []byte) (n int, err error) {
+func (l *Logger) Write(p []byte) (n int, err error) {
 	n = len(p)
 	if n > 0 && p[n-1] == '\n' {
 		// Trim CR added by stdlog.

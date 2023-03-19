@@ -130,6 +130,8 @@ func GlobalLevel() Level {
 }
 
 // DisableSampling will disable sampling in all Loggers if true.
+//
+//goland:noinspection GoUnusedExportedFunction
 func DisableSampling(v bool) {
 	var i int32
 	if v {

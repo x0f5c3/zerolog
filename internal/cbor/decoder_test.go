@@ -35,7 +35,7 @@ func TestDecodeArray(t *testing.T) {
 			t.Errorf("array2Json(0x%s)=%s, want: %s", hex.EncodeToString([]byte(tc.binary)), buf.String(), tc.json)
 		}
 	}
-	//Unspecified Length Array
+	// Unspecified Length Array
 	var infiniteArrayTestCases = []struct {
 		in  string
 		out string
@@ -60,7 +60,7 @@ func TestDecodeArray(t *testing.T) {
 			t.Errorf("array2Json(0x%s)=%s, want: %s", hex.EncodeToString([]byte(tc.binary)), buf.String(), tc.json)
 		}
 	}
-	//TODO add cases for arrays of other types
+	// TODO add cases for arrays of other types
 }
 
 var infiniteMapDecodeTestCases = []struct {
@@ -124,9 +124,9 @@ func TestDecodeTimestamp(t *testing.T) {
 	}
 	for _, tc := range timeFloatTestcases {
 		tm := decodeTagData(getReader(tc.out))
-		//Since we convert to float and back - it may be slightly off - so
-		//we cannot check for exact equality instead, we'll check it is
-		//very close to each other Less than a Microsecond (lets not yet do nanosec)
+		// Since we convert to float and back - it may be slightly off - so
+		// we cannot check for exact equality instead, we'll check it is
+		// very close to each other Less than a Microsecond (lets not yet do nanosec)
 
 		got, _ := time.Parse(string(tm), string(tm))
 		want, _ := time.Parse(tc.rfcStr, tc.rfcStr)
@@ -174,7 +174,7 @@ var compositeCborTestCases = []struct {
 func TestDecodeCbor2Json(t *testing.T) {
 	for _, tc := range compositeCborTestCases {
 		buf := bytes.NewBuffer([]byte{})
-		err := Cbor2JsonManyObjects(getReader(string(tc.binary)), buf)
+		err := ManyObjCBOR2JSON(getReader(string(tc.binary)), buf)
 		if buf.String() != tc.json || err != nil {
 			t.Errorf("cbor2JsonManyObjects(0x%s)=%s, want: %s, err:%s", hex.EncodeToString(tc.binary), buf.String(), tc.json, err.Error())
 		}
@@ -197,7 +197,7 @@ var negativeCborTestCases = []struct {
 func TestDecodeNegativeCbor2Json(t *testing.T) {
 	for _, tc := range negativeCborTestCases {
 		buf := bytes.NewBuffer([]byte{})
-		err := Cbor2JsonManyObjects(getReader(string(tc.binary)), buf)
+		err := ManyObjCBOR2JSON(getReader(string(tc.binary)), buf)
 		if err == nil || err.Error() != tc.errStr {
 			t.Errorf("Expected error got:%s, want:%s", err, tc.errStr)
 		}

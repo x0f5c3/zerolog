@@ -1,4 +1,4 @@
-// +build !386
+//go:build !386
 
 package cbor
 
@@ -9,7 +9,7 @@ import (
 
 var enc2 = Encoder{}
 
-var integerTestCases_64bit = []struct {
+var integertestcases64bit = []struct {
 	val    int
 	binary string
 }{
@@ -22,7 +22,7 @@ var integerTestCases_64bit = []struct {
 }
 
 func TestAppendInt_64bit(t *testing.T) {
-	for _, tc := range integerTestCases_64bit {
+	for _, tc := range integertestcases64bit {
 		s := enc2.AppendInt([]byte{}, tc.val)
 		got := string(s)
 		if got != tc.binary {

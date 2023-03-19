@@ -2,7 +2,7 @@ package zerolog
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math"
 	"net"
 	"time"
@@ -10,11 +10,11 @@ import (
 
 // Context configures a new sub-logger with contextual fields.
 type Context struct {
-	l Logger
+	l *Logger
 }
 
 // Logger returns the logger with the context previously set.
-func (c Context) Logger() Logger {
+func (c Context) Logger() *Logger {
 	return c.l
 }
 
@@ -56,7 +56,7 @@ func (c Context) Array(key string, arr LogArrayMarshaler) Context {
 
 // Object marshals an object that implement the LogObjectMarshaler interface.
 func (c Context) Object(key string, obj LogObjectMarshaler) Context {
-	e := newEvent(levelWriterAdapter{ioutil.Discard}, 0)
+	e := newEvent(levelWriterAdapter{io.Discard}, 0)
 	e.Object(key, obj)
 	c.l.context = enc.AppendObjectData(c.l.context, e.buf)
 	putEvent(e)
@@ -65,7 +65,7 @@ func (c Context) Object(key string, obj LogObjectMarshaler) Context {
 
 // EmbedObject marshals and Embeds an object that implement the LogObjectMarshaler interface.
 func (c Context) EmbedObject(obj LogObjectMarshaler) Context {
-	e := newEvent(levelWriterAdapter{ioutil.Discard}, 0)
+	e := newEvent(levelWriterAdapter{io.Discard}, 0)
 	e.EmbedObject(obj)
 	c.l.context = enc.AppendObjectData(c.l.context, e.buf)
 	putEvent(e)
@@ -323,6 +323,7 @@ func (c Context) Floats64(key string, f []float64) Context {
 
 type timestampHook struct{}
 
+//goland:noinspection GoUnusedParameter,GoUnusedParameter
 func (ts timestampHook) Run(e *Event, level Level, msg string) {
 	e.Timestamp()
 }
@@ -351,12 +352,16 @@ func (c Context) Times(key string, t []time.Time) Context {
 }
 
 // Dur adds the fields key with d divided by unit and stored as a float.
+//
+//goland:noinspection GoBoolExpressions
 func (c Context) Dur(key string, d time.Duration) Context {
 	c.l.context = enc.AppendDuration(enc.AppendKey(c.l.context, key), d, DurationFieldUnit, DurationFieldInteger)
 	return c
 }
 
 // Durs adds the fields key with d divided by unit and stored as a float.
+//
+//goland:noinspection GoBoolExpressions
 func (c Context) Durs(key string, d []time.Duration) Context {
 	c.l.context = enc.AppendDurations(enc.AppendKey(c.l.context, key), d, DurationFieldUnit, DurationFieldInteger)
 	return c
@@ -376,6 +381,7 @@ func newCallerHook(skipFrameCount int) callerHook {
 	return callerHook{callerSkipFrameCount: skipFrameCount}
 }
 
+//goland:noinspection GoUnusedParameter,GoUnusedParameter
 func (ch callerHook) Run(e *Event, level Level, msg string) {
 	switch ch.callerSkipFrameCount {
 	case useGlobalSkipFrameCount:

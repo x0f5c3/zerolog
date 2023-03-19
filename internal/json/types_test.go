@@ -46,13 +46,13 @@ func TestAppendType(t *testing.T) {
 		{"AppendFloat32(1e20)", "AppendFloat32", float32(1e20), []byte(`100000000000000000000`)},
 		{"AppendFloat32(1e21)", "AppendFloat32", float32(1e21), []byte(`1000000000000000000000`)},
 
-		{"AppendFloat64(-Inf)", "AppendFloat64", float64(math.Inf(-1)), []byte(`"-Inf"`)},
-		{"AppendFloat64(+Inf)", "AppendFloat64", float64(math.Inf(1)), []byte(`"+Inf"`)},
-		{"AppendFloat64(NaN)", "AppendFloat64", float64(math.NaN()), []byte(`"NaN"`)},
+		{"AppendFloat64(-Inf)", "AppendFloat64", math.Inf(-1), []byte(`"-Inf"`)},
+		{"AppendFloat64(+Inf)", "AppendFloat64", math.Inf(1), []byte(`"+Inf"`)},
+		{"AppendFloat64(NaN)", "AppendFloat64", math.NaN(), []byte(`"NaN"`)},
 		{"AppendFloat64(0)", "AppendFloat64", float64(0), []byte(`0`)},
-		{"AppendFloat64(-1.1)", "AppendFloat64", float64(-1.1), []byte(`-1.1`)},
-		{"AppendFloat64(1e20)", "AppendFloat64", float64(1e20), []byte(`100000000000000000000`)},
-		{"AppendFloat64(1e21)", "AppendFloat64", float64(1e21), []byte(`1000000000000000000000`)},
+		{"AppendFloat64(-1.1)", "AppendFloat64", -1.1, []byte(`-1.1`)},
+		{"AppendFloat64(1e20)", "AppendFloat64", 1e20, []byte(`100000000000000000000`)},
+		{"AppendFloat64(1e21)", "AppendFloat64", 1e21, []byte(`1000000000000000000000`)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -174,7 +174,7 @@ func Test_appendType(t *testing.T) {
 	}{
 		{"int", 42, []byte(`"int"`)},
 		{"MAC", net.HardwareAddr{0x12, 0x34, 0x00, 0x00, 0x90, 0xab}, []byte(`"net.HardwareAddr"`)},
-		{"float64", float64(2.50), []byte(`"float64"`)},
+		{"float64", 2.50, []byte(`"float64"`)},
 		{"nil", nil, []byte(`"<nil>"`)},
 		{"bool", true, []byte(`"bool"`)},
 	}

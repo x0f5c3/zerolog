@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/rs/xid"
+
 	"github.com/x0f5c3/zerolog"
 	"github.com/x0f5c3/zerolog/hlog/internal/mutil"
 	"github.com/x0f5c3/zerolog/log"
@@ -19,7 +20,7 @@ func FromRequest(r *http.Request) *zerolog.Logger {
 }
 
 // NewHandler injects log into requests context.
-func NewHandler(log zerolog.Logger) func(http.Handler) http.Handler {
+func NewHandler(log *zerolog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Create a copy of the logger (including internal context slice)
@@ -36,8 +37,8 @@ func NewHandler(log zerolog.Logger) func(http.Handler) http.Handler {
 func URLHandler(fieldKey string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log := zerolog.Ctx(r.Context())
-			log.UpdateContext(func(c zerolog.Context) zerolog.Context {
+			l := zerolog.Ctx(r.Context())
+			l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 				return c.Str(fieldKey, r.URL.String())
 			})
 			next.ServeHTTP(w, r)
@@ -50,8 +51,8 @@ func URLHandler(fieldKey string) func(next http.Handler) http.Handler {
 func MethodHandler(fieldKey string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log := zerolog.Ctx(r.Context())
-			log.UpdateContext(func(c zerolog.Context) zerolog.Context {
+			l := zerolog.Ctx(r.Context())
+			l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 				return c.Str(fieldKey, r.Method)
 			})
 			next.ServeHTTP(w, r)
@@ -64,8 +65,8 @@ func MethodHandler(fieldKey string) func(next http.Handler) http.Handler {
 func RequestHandler(fieldKey string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log := zerolog.Ctx(r.Context())
-			log.UpdateContext(func(c zerolog.Context) zerolog.Context {
+			l := zerolog.Ctx(r.Context())
+			l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 				return c.Str(fieldKey, r.Method+" "+r.URL.String())
 			})
 			next.ServeHTTP(w, r)
@@ -79,8 +80,8 @@ func RemoteAddrHandler(fieldKey string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.RemoteAddr != "" {
-				log := zerolog.Ctx(r.Context())
-				log.UpdateContext(func(c zerolog.Context) zerolog.Context {
+				l := zerolog.Ctx(r.Context())
+				l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 					return c.Str(fieldKey, r.RemoteAddr)
 				})
 			}
@@ -95,8 +96,8 @@ func UserAgentHandler(fieldKey string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if ua := r.Header.Get("User-Agent"); ua != "" {
-				log := zerolog.Ctx(r.Context())
-				log.UpdateContext(func(c zerolog.Context) zerolog.Context {
+				l := zerolog.Ctx(r.Context())
+				l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 					return c.Str(fieldKey, ua)
 				})
 			}
@@ -111,8 +112,8 @@ func RefererHandler(fieldKey string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if ref := r.Header.Get("Referer"); ref != "" {
-				log := zerolog.Ctx(r.Context())
-				log.UpdateContext(func(c zerolog.Context) zerolog.Context {
+				l := zerolog.Ctx(r.Context())
+				l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 					return c.Str(fieldKey, ref)
 				})
 			}
@@ -126,8 +127,8 @@ func RefererHandler(fieldKey string) func(next http.Handler) http.Handler {
 func ProtoHandler(fieldKey string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log := zerolog.Ctx(r.Context())
-			log.UpdateContext(func(c zerolog.Context) zerolog.Context {
+			l := zerolog.Ctx(r.Context())
+			l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 				return c.Str(fieldKey, r.Proto)
 			})
 			next.ServeHTTP(w, r)
@@ -176,8 +177,8 @@ func RequestIDHandler(fieldKey, headerName string) func(next http.Handler) http.
 				r = r.WithContext(ctx)
 			}
 			if fieldKey != "" {
-				log := zerolog.Ctx(ctx)
-				log.UpdateContext(func(c zerolog.Context) zerolog.Context {
+				l := zerolog.Ctx(ctx)
+				l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 					return c.Str(fieldKey, id.String())
 				})
 			}
@@ -195,8 +196,8 @@ func CustomHeaderHandler(fieldKey, header string) func(next http.Handler) http.H
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if val := r.Header.Get(header); val != "" {
-				log := zerolog.Ctx(r.Context())
-				log.UpdateContext(func(c zerolog.Context) zerolog.Context {
+				l := zerolog.Ctx(r.Context())
+				l.UpdateContext(func(c zerolog.Context) zerolog.Context {
 					return c.Str(fieldKey, val)
 				})
 			}
@@ -206,6 +207,8 @@ func CustomHeaderHandler(fieldKey, header string) func(next http.Handler) http.H
 }
 
 // AccessHandler returns a handler that call f after each request.
+//
+//goland:noinspection GoUnusedExportedFunction
 func AccessHandler(f func(r *http.Request, status, size int, duration time.Duration)) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

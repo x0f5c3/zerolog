@@ -1,4 +1,4 @@
-// +build !binary_log
+//go:build !binary_log
 
 package pkgerrors
 
@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
+
 	"github.com/x0f5c3/zerolog"
 )
 

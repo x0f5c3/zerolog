@@ -1,4 +1,4 @@
-// +build !binary_log
+//go:build !binary_log
 
 package log_test
 
