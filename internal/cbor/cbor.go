@@ -49,7 +49,7 @@ const (
 )
 
 const (
-	maskOutAdditionalType byte = (7 << majorOffset)
+	maskOutAdditionalType byte = 7 << majorOffset
 	maskOutMajorType      byte = 31
 )
 
@@ -70,6 +70,7 @@ var IntegerTimeFieldFormat = time.RFC3339
 // from a float value (time in seconds and nanoseconds).
 var NanoTimeFieldFormat = time.RFC3339Nano
 
+//goland:noinspection GoLinter
 func appendCborTypePrefix(dst []byte, major byte, number uint64) []byte {
 	byteCount := 8
 	var minor byte

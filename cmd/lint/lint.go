@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/x0f5c3/zerolog/internal/utils"
+	"github.com/x0f5c3/zerolog/log"
 	"golang.org/x/tools/go/loader"
 )
 
@@ -30,10 +32,13 @@ func init() {
 	flag.Parse()
 
 	// add zerolog to recursively ignored packages
-	recursivelyIgnoredPkgs = append(recursivelyIgnoredPkgs, "github.com/rs/zerolog")
+	recursivelyIgnoredPkgs = append(recursivelyIgnoredPkgs, "github.com/x0f5c3/zerolog")
 	args := flag.Args()
 	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "you must provide exactly one package path")
+		_, err := fmt.Fprintln(os.Stderr, "you must provide exactly one package path")
+		if err != nil {
+			log.Error().Err(err).Msg("You must provice exactly one package path")
+		}
 		os.Exit(1)
 	}
 	rootPkg = args[0]
@@ -49,14 +54,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	// get the github.com/rs/zerolog.Event type
+	// get the github.com/x0f5c3/zerolog.Event type
 	event := getEvent(p)
 	if event == nil {
-		fmt.Fprintln(os.Stderr, "Error: github.com/rs/zerolog.Event declaration not found, maybe zerolog is not imported in the scanned package?")
+		fmt.Fprintln(os.Stderr, "Error: github.com/x0f5c3/zerolog.Event declaration not found, maybe zerolog is not imported in the scanned package?")
 		os.Exit(1)
 	}
 
-	// get all selections (function calls) with the github.com/rs/zerolog.Event (or pointer) receiver
+	// get all selections (function calls) with the github.com/x0f5c3/zerolog.Event (or pointer) receiver
 	selections := getSelectionsWithReceiverType(p, event)
 
 	// print the violations (if any)
@@ -80,7 +85,7 @@ func main() {
 
 func getEvent(p *loader.Program) types.Type {
 	for _, pkg := range p.AllPackages {
-		if strings.HasSuffix(pkg.Pkg.Path(), "github.com/rs/zerolog") {
+		if strings.HasSuffix(pkg.Pkg.Path(), "github.com/x0f5c3/zerolog") {
 			for _, d := range pkg.Defs {
 				if d != nil && d.Name() == "Event" {
 					return d.Type()

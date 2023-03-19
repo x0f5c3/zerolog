@@ -29,6 +29,8 @@ type WriterProxy interface {
 
 // WrapWriter wraps an http.ResponseWriter, returning a proxy that allows you to
 // hook into various parts of the response process.
+//
+//goland:noinspection GoDeprecation
 func WrapWriter(w http.ResponseWriter) WriterProxy {
 	_, cn := w.(http.CloseNotifier)
 	_, fl := w.(http.Flusher)
@@ -107,6 +109,7 @@ type fancyWriter struct {
 	basicWriter
 }
 
+//goland:noinspection GoDeprecation
 func (f *fancyWriter) CloseNotify() <-chan bool {
 	cn := f.basicWriter.ResponseWriter.(http.CloseNotifier)
 	return cn.CloseNotify()
@@ -145,6 +148,7 @@ func (f *flushWriter) Flush() {
 	fl.Flush()
 }
 
+//goland:noinspection GoDeprecation
 var (
 	_ http.CloseNotifier = &fancyWriter{}
 	_ http.Flusher       = &fancyWriter{}

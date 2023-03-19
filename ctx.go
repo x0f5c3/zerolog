@@ -9,7 +9,7 @@ var disabledLogger *Logger
 func init() {
 	SetGlobalLevel(TraceLevel)
 	l := Nop()
-	disabledLogger = &l
+	disabledLogger = l
 }
 
 type ctxKey struct{}
@@ -25,14 +25,13 @@ type ctxKey struct{}
 // replacing it in a new Context), use UpdateContext with the following
 // notation:
 //
-//     ctx := r.Context()
-//     l := zerolog.Ctx(ctx)
-//     l.UpdateContext(func(c Context) Context {
-//         return c.Str("bar", "baz")
-//     })
-//
-func (l Logger) WithContext(ctx context.Context) context.Context {
-	if _, ok := ctx.Value(ctxKey{}).(*Logger); !ok && l.level == Disabled {
+//	ctx := r.Context()
+//	l := zerolog.Ctx(ctx)
+//	l.UpdateContext(func(c Context) Context {
+//	    return c.Str("bar", "baz")
+//	})
+func (l *Logger) WithContext(ctx context.Context) context.Context {
+	if _, ok := ctx.Value(ctxKey{}).(Logger); !ok && l.level == Disabled {
 		// Do not store disabled logger.
 		return ctx
 	}

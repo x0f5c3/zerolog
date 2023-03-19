@@ -200,6 +200,8 @@ func (a *Array) Time(t time.Time) *Array {
 }
 
 // Dur appends d to the array.
+//
+//goland:noinspection GoBoolExpressions,GoBoolExpressions
 func (a *Array) Dur(d time.Duration) *Array {
 	a.buf = enc.AppendDuration(enc.AppendArrayDelim(a.buf), d, DurationFieldUnit, DurationFieldInteger)
 	return a

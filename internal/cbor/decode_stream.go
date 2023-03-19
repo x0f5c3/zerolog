@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/x0f5c3/zerolog/internal/utils"
 )
 
 var decodeTimeZone *time.Location
@@ -28,7 +30,7 @@ func readNBytes(src *bufio.Reader, n int) []byte {
 	for i := 0; i < n; i++ {
 		ch, e := src.ReadByte()
 		if e != nil {
-			panic(fmt.Errorf("Tried to Read %d Bytes.. But hit end of file", n))
+			panic(fmt.Errorf("tried to Read %d Bytes.. But hit end of file", n))
 		}
 		ret[i] = ch
 	}
@@ -38,7 +40,7 @@ func readNBytes(src *bufio.Reader, n int) []byte {
 func readByte(src *bufio.Reader) byte {
 	b, e := src.ReadByte()
 	if e != nil {
-		panic(fmt.Errorf("Tried to Read 1 Byte.. But hit end of file"))
+		panic(fmt.Errorf("tried to Read 1 Byte.. But hit end of file"))
 	}
 	return b
 }
@@ -59,7 +61,7 @@ func decodeIntAdditionalType(src *bufio.Reader, minor byte) int64 {
 		case additionalTypeIntUint64:
 			bytesToRead = 8
 		default:
-			panic(fmt.Errorf("Invalid Additional Type: %d in decodeInteger (expected <28)", minor))
+			panic(fmt.Errorf("invalid Additional Type: %d in decodeInteger (expected <28)", minor))
 		}
 		pb := readNBytes(src, bytesToRead)
 		for i := 0; i < bytesToRead; i++ {
@@ -75,13 +77,13 @@ func decodeInteger(src *bufio.Reader) int64 {
 	major := pb & maskOutAdditionalType
 	minor := pb & maskOutMajorType
 	if major != majorTypeUnsignedInt && major != majorTypeNegativeInt {
-		panic(fmt.Errorf("Major type is: %d in decodeInteger!! (expected 0 or 1)", major))
+		panic(fmt.Errorf("major type is: %d in decodeInteger!! (expected 0 or 1)", major))
 	}
 	val := decodeIntAdditionalType(src, minor)
 	if major == 0 {
 		return val
 	}
-	return (-1 - val)
+	return -1 - val
 }
 
 func decodeFloat(src *bufio.Reader) (float64, int) {
@@ -89,7 +91,7 @@ func decodeFloat(src *bufio.Reader) (float64, int) {
 	major := pb & maskOutAdditionalType
 	minor := pb & maskOutMajorType
 	if major != majorTypeSimpleAndFloat {
-		panic(fmt.Errorf("Incorrect Major type is: %d in decodeFloat", major))
+		panic(fmt.Errorf("incorrect Major type is: %d in decodeFloat", major))
 	}
 
 	switch minor {
@@ -131,7 +133,7 @@ func decodeFloat(src *bufio.Reader) (float64, int) {
 		val := math.Float64frombits(n)
 		return val, isFloat64
 	}
-	panic(fmt.Errorf("Invalid Additional Type: %d in decodeFloat", minor))
+	panic(fmt.Errorf("invalid Additional Type: %d in decodeFloat", minor))
 }
 
 func decodeStringComplex(dst []byte, s string, pos uint) []byte {
@@ -198,15 +200,15 @@ func decodeString(src *bufio.Reader, noQuotes bool) []byte {
 	major := pb & maskOutAdditionalType
 	minor := pb & maskOutMajorType
 	if major != majorTypeByteString {
-		panic(fmt.Errorf("Major type is: %d in decodeString", major))
+		panic(fmt.Errorf("major type is: %d in decodeString", major))
 	}
-	result := []byte{}
+	var result []byte
 	if !noQuotes {
 		result = append(result, '"')
 	}
 	length := decodeIntAdditionalType(src, minor)
-	len := int(length)
-	pbs := readNBytes(src, len)
+	length2 := int(length)
+	pbs := readNBytes(src, length2)
 	result = append(result, pbs...)
 	if noQuotes {
 		return result
@@ -219,14 +221,14 @@ func decodeUTF8String(src *bufio.Reader) []byte {
 	major := pb & maskOutAdditionalType
 	minor := pb & maskOutMajorType
 	if major != majorTypeUtf8String {
-		panic(fmt.Errorf("Major type is: %d in decodeUTF8String", major))
+		panic(fmt.Errorf("major type is: %d in decodeUTF8String", major))
 	}
 	result := []byte{'"'}
 	length := decodeIntAdditionalType(src, minor)
-	len := int(length)
-	pbs := readNBytes(src, len)
+	length2 := int(length)
+	pbs := readNBytes(src, length2)
 
-	for i := 0; i < len; i++ {
+	for i := 0; i < length2; i++ {
 		// Check if the character needs encoding. Control characters, slashes,
 		// and the double quote need json encoding. Bytes above the ascii
 		// boundary needs utf8 encoding.
@@ -245,22 +247,23 @@ func decodeUTF8String(src *bufio.Reader) []byte {
 }
 
 func array2Json(src *bufio.Reader, dst io.Writer) {
-	dst.Write([]byte{'['})
+	_, err := dst.Write([]byte{'['})
+	utils.HandleErr(err, "Failed to write start of array")
 	pb := readByte(src)
 	major := pb & maskOutAdditionalType
 	minor := pb & maskOutMajorType
 	if major != majorTypeArray {
-		panic(fmt.Errorf("Major type is: %d in array2Json", major))
+		panic(fmt.Errorf("major type is: %d in array2Json", major))
 	}
-	len := 0
+	len2 := 0
 	unSpecifiedCount := false
 	if minor == additionalTypeInfiniteCount {
 		unSpecifiedCount = true
 	} else {
 		length := decodeIntAdditionalType(src, minor)
-		len = int(length)
+		len2 = int(length)
 	}
-	for i := 0; unSpecifiedCount || i < len; i++ {
+	for i := 0; unSpecifiedCount || i < len2; i++ {
 		if unSpecifiedCount {
 			pb, e := src.Peek(1)
 			if e != nil {
@@ -281,12 +284,15 @@ func array2Json(src *bufio.Reader, dst io.Writer) {
 				readByte(src)
 				break
 			}
-			dst.Write([]byte{','})
-		} else if i+1 < len {
-			dst.Write([]byte{','})
+			_, err = dst.Write([]byte{','})
+			utils.HandleErr(err, "Failed to write a comma")
+		} else if i+1 < len2 {
+			_, err = dst.Write([]byte{','})
+			utils.HandleErr(err, "Failed to write a comma")
 		}
 	}
-	dst.Write([]byte{']'})
+	_, err = dst.Write([]byte{']'})
+	utils.HandleErr(err, "Failed to write a closing bracket")
 }
 
 func map2Json(src *bufio.Reader, dst io.Writer) {
@@ -294,18 +300,19 @@ func map2Json(src *bufio.Reader, dst io.Writer) {
 	major := pb & maskOutAdditionalType
 	minor := pb & maskOutMajorType
 	if major != majorTypeMap {
-		panic(fmt.Errorf("Major type is: %d in map2Json", major))
+		panic(fmt.Errorf("major type is: %d in map2Json", major))
 	}
-	len := 0
+	l := 0
 	unSpecifiedCount := false
 	if minor == additionalTypeInfiniteCount {
 		unSpecifiedCount = true
 	} else {
 		length := decodeIntAdditionalType(src, minor)
-		len = int(length)
+		l = int(length)
 	}
-	dst.Write([]byte{'{'})
-	for i := 0; unSpecifiedCount || i < len; i++ {
+	_, err := dst.Write([]byte{'{'})
+	utils.HandleErr(err, "Can't write")
+	for i := 0; unSpecifiedCount || i < l; i++ {
 		if unSpecifiedCount {
 			pb, e := src.Peek(1)
 			if e != nil {
@@ -319,7 +326,8 @@ func map2Json(src *bufio.Reader, dst io.Writer) {
 		cbor2JsonOneObject(src, dst)
 		if i%2 == 0 {
 			// Even position values are keys.
-			dst.Write([]byte{':'})
+			_, err = dst.Write([]byte{':'})
+			utils.HandleErr(err, "Can't write")
 		} else {
 			if unSpecifiedCount {
 				pb, e := src.Peek(1)
@@ -330,13 +338,16 @@ func map2Json(src *bufio.Reader, dst io.Writer) {
 					readByte(src)
 					break
 				}
-				dst.Write([]byte{','})
-			} else if i+1 < len {
-				dst.Write([]byte{','})
+				_, err = dst.Write([]byte{','})
+				utils.HandleErr(err, "Can't write")
+			} else if i+1 < l {
+				_, err = dst.Write([]byte{','})
+				utils.HandleErr(err, "Can't write")
 			}
 		}
 	}
-	dst.Write([]byte{'}'})
+	_, err = dst.Write([]byte{'}'})
+	utils.HandleErr(err, "Can't write")
 }
 
 func decodeTagData(src *bufio.Reader) []byte {
@@ -344,7 +355,7 @@ func decodeTagData(src *bufio.Reader) []byte {
 	major := pb & maskOutAdditionalType
 	minor := pb & maskOutMajorType
 	if major != majorTypeTags {
-		panic(fmt.Errorf("Major type is: %d in decodeTagData", major))
+		panic(fmt.Errorf("major type is: %d in decodeTagData", major))
 	}
 	switch minor {
 	case additionalTypeTimestamp:
@@ -359,9 +370,9 @@ func decodeTagData(src *bufio.Reader) []byte {
 			pb := readByte(src)
 			dataMajor := pb & maskOutAdditionalType
 			if dataMajor != majorTypeByteString {
-				panic(fmt.Errorf("Unsupported embedded Type: %d in decodeEmbeddedJSON", dataMajor))
+				panic(fmt.Errorf("unsupported embedded Type: %d in decodeEmbeddedJSON", dataMajor))
 			}
-			src.UnreadByte()
+			utils.HandleErr(src.UnreadByte(), "Can't unread byte")
 			return decodeString(src, true)
 
 		case additionalTypeTagNetworkAddr:
@@ -377,7 +388,7 @@ func decodeTagData(src *bufio.Reader) []byte {
 				ip := net.IP(octets)
 				ss = append(append(ss, ip.String()...), '"')
 			default:
-				panic(fmt.Errorf("Unexpected Network Address length: %d (expected 4,6,16)", len(octets)))
+				panic(fmt.Errorf("unexpected Network Address length: %d (expected 4,6,16)", len(octets)))
 			}
 			return ss
 
@@ -410,15 +421,16 @@ func decodeTagData(src *bufio.Reader) []byte {
 			return append(ss, '"')
 
 		default:
-			panic(fmt.Errorf("Unsupported Additional Tag Type: %d in decodeTagData", val))
+			panic(fmt.Errorf("unsupported Additional Tag Type: %d in decodeTagData", val))
 		}
 	}
-	panic(fmt.Errorf("Unsupported Additional Type: %d in decodeTagData", minor))
+	panic(fmt.Errorf("unsupported Additional Type: %d in decodeTagData", minor))
 }
 
 func decodeTimeStamp(src *bufio.Reader) []byte {
 	pb := readByte(src)
-	src.UnreadByte()
+	err := src.UnreadByte()
+	utils.HandleErr(err, "Can't unread byte")
 	tsMajor := pb & maskOutAdditionalType
 	if tsMajor == majorTypeUnsignedInt || tsMajor == majorTypeNegativeInt {
 		n := decodeInteger(src)
@@ -428,7 +440,7 @@ func decodeTimeStamp(src *bufio.Reader) []byte {
 		} else {
 			t = t.In(time.UTC)
 		}
-		tsb := []byte{}
+		var tsb []byte
 		tsb = append(tsb, '"')
 		tsb = t.AppendFormat(tsb, IntegerTimeFieldFormat)
 		tsb = append(tsb, '"')
@@ -437,14 +449,14 @@ func decodeTimeStamp(src *bufio.Reader) []byte {
 		n, _ := decodeFloat(src)
 		secs := int64(n)
 		n -= float64(secs)
-		n *= float64(1e9)
+		n *= 1e9
 		t := time.Unix(secs, int64(n))
 		if decodeTimeZone != nil {
 			t = t.In(decodeTimeZone)
 		} else {
 			t = t.In(time.UTC)
 		}
-		tsb := []byte{}
+		var tsb []byte
 		tsb = append(tsb, '"')
 		tsb = t.AppendFormat(tsb, NanoTimeFieldFormat)
 		tsb = append(tsb, '"')
@@ -458,7 +470,7 @@ func decodeSimpleFloat(src *bufio.Reader) []byte {
 	major := pb & maskOutAdditionalType
 	minor := pb & maskOutMajorType
 	if major != majorTypeSimpleAndFloat {
-		panic(fmt.Errorf("Major type is: %d in decodeSimpleFloat", major))
+		panic(fmt.Errorf("major type is: %d in decodeSimpleFloat", major))
 	}
 	switch minor {
 	case additionalTypeBoolTrue:
@@ -472,9 +484,10 @@ func decodeSimpleFloat(src *bufio.Reader) []byte {
 	case additionalTypeFloat32:
 		fallthrough
 	case additionalTypeFloat64:
-		src.UnreadByte()
+		err := src.UnreadByte()
+		utils.HandleErr(err, "Can't unread byte")
 		v, bc := decodeFloat(src)
-		ba := []byte{}
+		var ba []byte
 		switch {
 		case math.IsNaN(v):
 			return []byte("\"NaN\"")
@@ -488,11 +501,11 @@ func decodeSimpleFloat(src *bufio.Reader) []byte {
 		} else if bc == isFloat64 {
 			ba = strconv.AppendFloat(ba, v, 'f', -1, 64)
 		} else {
-			panic(fmt.Errorf("Invalid Float precision from decodeFloat: %d", bc))
+			panic(fmt.Errorf("invalid Float precision from decodeFloat: %d", bc))
 		}
 		return ba
 	default:
-		panic(fmt.Errorf("Invalid Additional Type: %d in decodeSimpleFloat", minor))
+		panic(fmt.Errorf("invalid Additional Type: %d in decodeSimpleFloat", minor))
 	}
 }
 
@@ -501,22 +514,25 @@ func cbor2JsonOneObject(src *bufio.Reader, dst io.Writer) {
 	if e != nil {
 		panic(e)
 	}
-	major := (pb[0] & maskOutAdditionalType)
+	major := pb[0] & maskOutAdditionalType
 
 	switch major {
 	case majorTypeUnsignedInt:
 		fallthrough
 	case majorTypeNegativeInt:
 		n := decodeInteger(src)
-		dst.Write([]byte(strconv.Itoa(int(n))))
+		_, err := dst.Write([]byte(strconv.Itoa(int(n))))
+		utils.HandleErr(err, "Can't write")
 
 	case majorTypeByteString:
 		s := decodeString(src, false)
-		dst.Write(s)
+		_, err := dst.Write(s)
+		utils.HandleErr(err, "Can't write")
 
 	case majorTypeUtf8String:
 		s := decodeUTF8String(src)
-		dst.Write(s)
+		_, err := dst.Write(s)
+		utils.HandleErr(err, "Can't write")
 
 	case majorTypeArray:
 		array2Json(src, dst)
@@ -526,24 +542,27 @@ func cbor2JsonOneObject(src *bufio.Reader, dst io.Writer) {
 
 	case majorTypeTags:
 		s := decodeTagData(src)
-		dst.Write(s)
+		_, err := dst.Write(s)
+		utils.HandleErr(err, "Can't write")
 
 	case majorTypeSimpleAndFloat:
 		s := decodeSimpleFloat(src)
-		dst.Write(s)
+		_, err := dst.Write(s)
+		utils.HandleErr(err, "Can't write")
 	}
 }
 
 func moreBytesToRead(src *bufio.Reader) bool {
 	_, e := src.ReadByte()
 	if e == nil {
-		src.UnreadByte()
+		err := src.UnreadByte()
+		utils.HandleErr(err, "Can't unread byte")
 		return true
 	}
 	return false
 }
 
-// Cbor2JsonManyObjects decodes all the CBOR Objects read from src
+// ManyObjCBOR2JSON decodes all the CBOR Objects read from src
 // reader. It keeps on decoding until reader returns EOF (error when reading).
 // Decoded string is written to the dst. At the end of every CBOR Object
 // newline is written to the output stream.
@@ -551,7 +570,7 @@ func moreBytesToRead(src *bufio.Reader) bool {
 // Returns error (if any) that was encountered during decode.
 // The child functions will generate a panic when error is encountered and
 // this function will recover non-runtime Errors and return the reason as error.
-func Cbor2JsonManyObjects(src io.Reader, dst io.Writer) (err error) {
+func ManyObjCBOR2JSON(src io.Reader, dst io.Writer) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			if _, ok := r.(runtime.Error); ok {
@@ -563,7 +582,8 @@ func Cbor2JsonManyObjects(src io.Reader, dst io.Writer) (err error) {
 	bufRdr := bufio.NewReader(src)
 	for moreBytesToRead(bufRdr) {
 		cbor2JsonOneObject(bufRdr, dst)
-		dst.Write([]byte("\n"))
+		_, err := dst.Write([]byte("\n"))
+		utils.HandleErr(err, "Can't write")
 	}
 	return nil
 }
@@ -585,7 +605,8 @@ func getReader(str string) *bufio.Reader {
 func DecodeIfBinaryToString(in []byte) string {
 	if binaryFmt(in) {
 		var b bytes.Buffer
-		Cbor2JsonManyObjects(strings.NewReader(string(in)), &b)
+		err := ManyObjCBOR2JSON(strings.NewReader(string(in)), &b)
+		utils.HandleErr(err, "Can't convert many objects from CBOR to JSON")
 		return b.String()
 	}
 	return string(in)
@@ -607,7 +628,8 @@ func DecodeObjectToStr(in []byte) string {
 func DecodeIfBinaryToBytes(in []byte) []byte {
 	if binaryFmt(in) {
 		var b bytes.Buffer
-		Cbor2JsonManyObjects(bytes.NewReader(in), &b)
+		err := ManyObjCBOR2JSON(bytes.NewReader(in), &b)
+		utils.HandleErr(err, "Can't convert many objects from CBOR to JSON")
 		return b.Bytes()
 	}
 	return in

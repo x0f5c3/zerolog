@@ -1,4 +1,4 @@
-// +build !binary_log
+//go:build !binary_log
 
 package diode_test
 
@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/diode"
+	"github.com/x0f5c3/zerolog"
+	"github.com/x0f5c3/zerolog/diode"
+	"github.com/x0f5c3/zerolog/internal/utils"
 )
 
 func ExampleNewWriter() {
@@ -17,7 +18,7 @@ func ExampleNewWriter() {
 	log := zerolog.New(w)
 	log.Print("test")
 
-	w.Close()
+	utils.HandleErr(w.Close(), "Failed to close the diode writer")
 
 	// Output: {"level":"debug","message":"test"}
 }

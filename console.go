@@ -2,7 +2,6 @@ package zerolog
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -13,9 +12,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/goccy/go-json"
+
 	"github.com/mattn/go-colorable"
 )
 
+//goland:noinspection GoUnusedConst
 const (
 	colorBlack = iota + 30
 	colorRed
@@ -102,7 +104,11 @@ func NewConsoleWriter(options ...func(w *ConsoleWriter)) ConsoleWriter {
 func (w ConsoleWriter) Write(p []byte) (n int, err error) {
 	// Fix color on Windows
 	if w.Out == os.Stdout || w.Out == os.Stderr {
-		w.Out = colorable.NewColorable(w.Out.(*os.File))
+		out, ok := w.Out.(*os.File)
+		if !ok {
+			return 0, fmt.Errorf("invalid output")
+		}
+		w.Out = colorable.NewColorable(out)
 	}
 
 	if w.PartsOrder == nil {
@@ -233,9 +239,9 @@ func (w ConsoleWriter) writeFields(evt map[string]interface{}, buf *bytes.Buffer
 		default:
 			b, err := InterfaceMarshalFunc(fValue)
 			if err != nil {
-				fmt.Fprintf(buf, colorize("[error: %v]", colorRed, w.NoColor), err)
+				_, _ = fmt.Fprintf(buf, colorize("[error: %v]", colorRed, w.NoColor), err)
 			} else {
-				fmt.Fprint(buf, fv(b))
+				_, _ = fmt.Fprint(buf, fv(b))
 			}
 		}
 

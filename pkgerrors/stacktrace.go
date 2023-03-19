@@ -31,6 +31,8 @@ func (s *state) Precision() (prec int, ok bool) {
 }
 
 // Flag implement fmt.Formatter interface.
+//
+//goland:noinspection GoUnusedParameter
 func (s *state) Flag(c int) bool {
 	return false
 }
@@ -42,7 +44,7 @@ func frameField(f errors.Frame, s *state, c rune) string {
 
 // MarshalStack implements pkg/errors stack trace marshaling.
 //
-//   zerolog.ErrorStackMarshaler = MarshalStack
+//	zerolog.ErrorStackMarshaler = MarshalStack
 func MarshalStack(err error) interface{} {
 	type stackTracer interface {
 		StackTrace() errors.StackTrace

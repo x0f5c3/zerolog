@@ -3,13 +3,14 @@ package zerolog_test
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/rs/zerolog"
+	"github.com/x0f5c3/zerolog"
+	"github.com/x0f5c3/zerolog/internal/utils"
 )
 
 func ExampleConsoleWriter() {
@@ -432,9 +433,10 @@ func BenchmarkConsoleWriter(b *testing.B) {
 
 	var msg = []byte(`{"level": "info", "foo": "bar", "message": "HELLO", "time": "1990-01-01"}`)
 
-	w := zerolog.ConsoleWriter{Out: ioutil.Discard, NoColor: false}
+	w := zerolog.ConsoleWriter{Out: io.Discard, NoColor: false}
 
 	for i := 0; i < b.N; i++ {
-		w.Write(msg)
+		_, err := w.Write(msg)
+		utils.HandleErr(err, "Failed writing")
 	}
 }

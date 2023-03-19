@@ -8,7 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rs/zerolog/diode/internal/diodes"
+	"github.com/x0f5c3/zerolog/diode/internal/diodes"
+	"github.com/x0f5c3/zerolog/internal/utils"
 )
 
 var bufPool = &sync.Pool{
@@ -39,10 +40,10 @@ type Writer struct {
 //
 // Use a diode.Writer when
 //
-//     wr := diode.NewWriter(w, 1000, 0, func(missed int) {
-//         log.Printf("Dropped %d messages", missed)
-//     })
-//     log := zerolog.New(wr)
+//	wr := diode.NewWriter(w, 1000, 0, func(missed int) {
+//	    log.Printf("Dropped %d messages", missed)
+//	})
+//	log := zerolog.New(wr)
 //
 // If pollInterval is greater than 0, a poller is used otherwise a waiter is
 // used.
@@ -98,7 +99,8 @@ func (dw Writer) poll() {
 			return
 		}
 		p := *(*[]byte)(d)
-		dw.w.Write(p)
+		_, err := dw.w.Write(p)
+		utils.HandleErr(err, "Can't write in poll")
 
 		// Proper usage of a sync.Pool requires each entry to have approximately
 		// the same memory cost. To obtain this property when the stored type
@@ -108,7 +110,8 @@ func (dw Writer) poll() {
 		// See https://golang.org/issue/23199
 		const maxSize = 1 << 16 // 64KiB
 		if cap(p) <= maxSize {
-			bufPool.Put(p[:0])
+			toPut := p[:0]
+			bufPool.Put(&toPut)
 		}
 	}
 }

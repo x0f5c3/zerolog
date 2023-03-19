@@ -41,7 +41,7 @@ func (Encoder) AppendArrayEnd(dst []byte) []byte {
 
 // AppendArrayDelim adds markers to indicate end of a particular array element.
 func (Encoder) AppendArrayDelim(dst []byte) []byte {
-	//No delimiters needed in cbor
+	// No delimiters needed in cbor
 	return dst
 }
 

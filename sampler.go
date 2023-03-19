@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+//goland:noinspection GoUnusedGlobalVariable,GoUnusedGlobalVariable
 var (
 	// Often samples log every ~ 10 events.
 	Often = RandomSampler(10)
@@ -27,6 +28,8 @@ type Sampler interface {
 type RandomSampler uint32
 
 // Sample implements the Sampler interface.
+//
+//goland:noinspection GoUnusedParameter
 func (s RandomSampler) Sample(lvl Level) bool {
 	if s <= 0 {
 		return false
@@ -45,6 +48,8 @@ type BasicSampler struct {
 }
 
 // Sample implements the Sampler interface.
+//
+//goland:noinspection GoUnusedParameter
 func (s *BasicSampler) Sample(lvl Level) bool {
 	n := s.N
 	if n == 1 {

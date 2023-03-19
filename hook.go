@@ -59,6 +59,8 @@ func (h LevelHook) Run(e *Event, level Level, message string) {
 }
 
 // NewLevelHook returns a new LevelHook.
+//
+//goland:noinspection GoUnusedExportedFunction
 func NewLevelHook() LevelHook {
 	return LevelHook{}
 }

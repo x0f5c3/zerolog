@@ -1,5 +1,4 @@
-// +build !binary_log
-// +build !windows
+//go:build !binary_log && !windows
 
 package zerolog
 
@@ -18,6 +17,7 @@ type syslogTestWriter struct {
 	events []syslogEvent
 }
 
+//goland:noinspection GoUnusedParameter
 func (w *syslogTestWriter) Write(p []byte) (int, error) {
 	return 0, nil
 }
@@ -76,6 +76,8 @@ type testCEEwriter struct {
 }
 
 // Only implement one method as we're just testing the prefixing
+//
+//goland:noinspection GoUnusedParameter
 func (c testCEEwriter) Debug(m string) error { return nil }
 
 func (c testCEEwriter) Info(m string) error {
@@ -83,12 +85,16 @@ func (c testCEEwriter) Info(m string) error {
 	return err
 }
 
+//goland:noinspection GoUnusedParameter
 func (c testCEEwriter) Warning(m string) error { return nil }
 
+//goland:noinspection GoUnusedParameter
 func (c testCEEwriter) Err(m string) error { return nil }
 
+//goland:noinspection GoUnusedParameter
 func (c testCEEwriter) Emerg(m string) error { return nil }
 
+//goland:noinspection GoUnusedParameter
 func (c testCEEwriter) Crit(m string) error { return nil }
 
 func (c testCEEwriter) Write(b []byte) (int, error) {

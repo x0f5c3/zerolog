@@ -33,6 +33,8 @@ func (e Encoder) appendFloatTimestamp(dst []byte, t time.Time) []byte {
 }
 
 // AppendTime encodes and adds a timestamp to the dst byte array.
+//
+//goland:noinspection GoUnusedParameter
 func (e Encoder) AppendTime(dst []byte, t time.Time, unused string) []byte {
 	utc := t.UTC()
 	if utc.Nanosecond() == 0 {

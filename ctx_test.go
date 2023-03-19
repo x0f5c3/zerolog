@@ -2,24 +2,24 @@ package zerolog
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"reflect"
 	"testing"
 )
 
 func TestCtx(t *testing.T) {
-	log := New(ioutil.Discard)
-	ctx := log.WithContext(context.Background())
+	l := New(io.Discard)
+	ctx := l.WithContext(context.Background())
 	log2 := Ctx(ctx)
-	if !reflect.DeepEqual(log, *log2) {
+	if !reflect.DeepEqual(l, *log2) {
 		t.Error("Ctx did not return the expected logger")
 	}
 
 	// update
-	log = log.Level(InfoLevel)
-	ctx = log.WithContext(ctx)
+	l = l.Level(InfoLevel)
+	ctx = l.WithContext(ctx)
 	log2 = Ctx(ctx)
-	if !reflect.DeepEqual(log, *log2) {
+	if !reflect.DeepEqual(l, *log2) {
 		t.Error("Ctx did not return the expected logger")
 	}
 
@@ -28,22 +28,22 @@ func TestCtx(t *testing.T) {
 		t.Error("Ctx did not return the expected logger")
 	}
 
-	DefaultContextLogger = &log
+	DefaultContextLogger = l
 	t.Cleanup(func() { DefaultContextLogger = nil })
 	log2 = Ctx(context.Background())
-	if log2 != &log {
+	if log2 != l {
 		t.Error("Ctx did not return the expected logger")
 	}
 }
 
 func TestCtxDisabled(t *testing.T) {
-	dl := New(ioutil.Discard).Level(Disabled)
+	dl := New(io.Discard).Level(Disabled)
 	ctx := dl.WithContext(context.Background())
 	if ctx != context.Background() {
 		t.Error("WithContext stored a disabled logger")
 	}
 
-	l := New(ioutil.Discard).With().Str("foo", "bar").Logger()
+	l := New(io.Discard).With().Str("foo", "bar").Logger()
 	ctx = l.WithContext(ctx)
 	if !reflect.DeepEqual(Ctx(ctx), &l) {
 		t.Error("WithContext did not store logger")

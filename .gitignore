@@ -5,6 +5,7 @@
 
 # Folders
 _obj
+.idea
 _test
 tmp
 

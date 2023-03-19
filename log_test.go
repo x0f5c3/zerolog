@@ -152,7 +152,7 @@ func TestFieldsMap(t *testing.T) {
 		"bytes":   []byte("bar"),
 		"error":   errors.New("some error"),
 		"bool":    true,
-		"int":     int(1),
+		"int":     1,
 		"int8":    int8(2),
 		"int16":   int16(3),
 		"int32":   int32(4),
@@ -255,7 +255,7 @@ func TestFieldsSlice(t *testing.T) {
 		"bytes", []byte("bar"),
 		"error", errors.New("some error"),
 		"bool", true,
-		"int", int(1),
+		"int", 1,
 		"int8", int8(2),
 		"int16", int16(3),
 		"int32", int32(4),
@@ -285,7 +285,7 @@ func TestFieldsSliceExtraneous(t *testing.T) {
 		"error", errors.New("some error"),
 		32, "valueForNonStringKey",
 		"bool", true,
-		"int", int(1),
+		"int", 1,
 		"keyWithoutValue",
 	}).Msg("")
 	if got, want := decodeIfBinaryToString(out.Bytes()), `{"string":"foo","error":"some error","bool":true,"int":1}`+"\n"; got != want {
@@ -849,6 +849,7 @@ type errWriter struct {
 	error
 }
 
+//goland:noinspection GoUnusedParameter
 func (w errWriter) Write(p []byte) (n int, err error) {
 	return 0, w.error
 }

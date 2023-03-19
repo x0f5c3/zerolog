@@ -673,6 +673,8 @@ func (e *Event) Times(key string, t []time.Time) *Event {
 // Dur adds the field key with duration d stored as zerolog.DurationFieldUnit.
 // If zerolog.DurationFieldInteger is true, durations are rendered as integer
 // instead of float.
+//
+//goland:noinspection GoBoolExpressions
 func (e *Event) Dur(key string, d time.Duration) *Event {
 	if e == nil {
 		return e
@@ -684,6 +686,8 @@ func (e *Event) Dur(key string, d time.Duration) *Event {
 // Durs adds the field key with duration d stored as zerolog.DurationFieldUnit.
 // If zerolog.DurationFieldInteger is true, durations are rendered as integer
 // instead of float.
+//
+//goland:noinspection GoBoolExpressions
 func (e *Event) Durs(key string, d []time.Duration) *Event {
 	if e == nil {
 		return e
@@ -695,6 +699,8 @@ func (e *Event) Durs(key string, d []time.Duration) *Event {
 // TimeDiff adds the field key with positive duration between time t and start.
 // If time t is not greater than start, duration will be 0.
 // Duration format follows the same principle as Dur().
+//
+//goland:noinspection GoBoolExpressions
 func (e *Event) TimeDiff(key string, t time.Time, start time.Time) *Event {
 	if e == nil {
 		return e

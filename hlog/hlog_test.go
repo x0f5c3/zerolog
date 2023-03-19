@@ -1,5 +1,4 @@
 //go:build go1.7
-// +build go1.7
 
 package hlog
 
@@ -7,7 +6,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -15,8 +14,9 @@ import (
 	"testing"
 
 	"github.com/rs/xid"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/internal/cbor"
+
+	"github.com/x0f5c3/zerolog"
+	"github.com/x0f5c3/zerolog/internal/cbor"
 )
 
 func decodeIfBinary(out *bytes.Buffer) string {
@@ -245,10 +245,10 @@ func BenchmarkHandlers(b *testing.B) {
 	}))
 	h2 := MethodHandler("method")(RequestHandler("request")(h1))
 	handlers := map[string]http.Handler{
-		"Single":           NewHandler(zerolog.New(ioutil.Discard))(h1),
-		"Combined":         NewHandler(zerolog.New(ioutil.Discard))(h2),
-		"SingleDisabled":   NewHandler(zerolog.New(ioutil.Discard).Level(zerolog.Disabled))(h1),
-		"CombinedDisabled": NewHandler(zerolog.New(ioutil.Discard).Level(zerolog.Disabled))(h2),
+		"Single":           NewHandler(zerolog.New(io.Discard))(h1),
+		"Combined":         NewHandler(zerolog.New(io.Discard))(h2),
+		"SingleDisabled":   NewHandler(zerolog.New(io.Discard).Level(zerolog.Disabled))(h1),
+		"CombinedDisabled": NewHandler(zerolog.New(io.Discard).Level(zerolog.Disabled))(h2),
 	}
 	for name := range handlers {
 		h := handlers[name]

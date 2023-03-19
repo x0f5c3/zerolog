@@ -3,26 +3,32 @@ package diode_test
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/diode"
-	"github.com/rs/zerolog/internal/cbor"
+	"github.com/x0f5c3/zerolog"
+	"github.com/x0f5c3/zerolog/diode"
+	"github.com/x0f5c3/zerolog/internal/cbor"
 )
+
+func handleErr(err error, l *zerolog.Logger, msg string) {
+	if err != nil {
+		l.Error().Err(err).Msg(msg)
+	}
+}
 
 func TestNewWriter(t *testing.T) {
 	buf := bytes.Buffer{}
 	w := diode.NewWriter(&buf, 1000, 0, func(missed int) {
 		fmt.Printf("Dropped %d messages\n", missed)
 	})
-	log := zerolog.New(w)
-	log.Print("test")
+	l := zerolog.New(w)
+	l.Print("test")
 
-	w.Close()
+	handleErr(w.Close(), l, "Failed to close the diode writer")
 	want := "{\"level\":\"debug\",\"message\":\"test\"}\n"
 	got := cbor.DecodeIfBinaryToString(buf.Bytes())
 	if got != want {
@@ -33,13 +39,13 @@ func TestNewWriter(t *testing.T) {
 func TestClose(t *testing.T) {
 	buf := bytes.Buffer{}
 	w := diode.NewWriter(&buf, 1000, 0, func(missed int) {})
-	log := zerolog.New(w)
-	log.Print("test")
-	w.Close()
+	l := zerolog.New(w)
+	l.Print("test")
+	handleErr(w.Close(), l, "Failed to close the diode writer")
 }
 
 func Benchmark(b *testing.B) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	defer log.SetOutput(os.Stderr)
 	benchs := map[string]time.Duration{
 		"Waiter": 0,
@@ -47,14 +53,14 @@ func Benchmark(b *testing.B) {
 	}
 	for name, interval := range benchs {
 		b.Run(name, func(b *testing.B) {
-			w := diode.NewWriter(ioutil.Discard, 100000, interval, nil)
-			log := zerolog.New(w)
-			defer w.Close()
+			w := diode.NewWriter(io.Discard, 100000, interval, nil)
+			l := zerolog.New(w)
+			defer handleErr(w.Close(), l, "Failed to close the diode discard writer")
 
 			b.SetParallelism(1000)
 			b.RunParallel(func(pb *testing.PB) {
 				for pb.Next() {
-					log.Print("test")
+					l.Print("test")
 				}
 			})
 		})

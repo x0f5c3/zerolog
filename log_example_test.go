@@ -1,4 +1,4 @@
-// +build !binary_log
+//go:build !binary_log
 
 package zerolog_test
 
@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rs/zerolog"
+	"github.com/x0f5c3/zerolog"
 )
 
 func ExampleNew() {
@@ -54,6 +54,7 @@ func ExampleLogger_Sample() {
 
 type LevelNameHook struct{}
 
+//goland:noinspection GoUnusedParameter
 func (h LevelNameHook) Run(e *zerolog.Event, l zerolog.Level, msg string) {
 	if l != zerolog.NoLevel {
 		e.Str("level_name", l.String())
@@ -64,6 +65,7 @@ func (h LevelNameHook) Run(e *zerolog.Event, l zerolog.Level, msg string) {
 
 type MessageHook string
 
+//goland:noinspection GoUnusedParameter
 func (h MessageHook) Run(e *zerolog.Event, l zerolog.Level, msg string) {
 	e.Str("the_message", msg)
 }

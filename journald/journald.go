@@ -1,5 +1,4 @@
 //go:build !windows
-// +build !windows
 
 // Package journald provides a io.Writer to send the logs
 // to journalD component of systemd.
@@ -19,14 +18,16 @@ package journald
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
 
+	"github.com/goccy/go-json"
+
 	"github.com/coreos/go-systemd/v22/journal"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/internal/cbor"
+
+	"github.com/x0f5c3/zerolog"
+	"github.com/x0f5c3/zerolog/internal/cbor"
 )
 
 const defaultJournalDPrio = journal.PriNotice

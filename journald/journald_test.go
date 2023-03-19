@@ -1,4 +1,4 @@
-// +build linux
+//go:build linux
 
 package journald_test
 
@@ -7,8 +7,8 @@ import (
 	"io"
 	"testing"
 
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/journald"
+	"github.com/x0f5c3/zerolog"
+	"github.com/x0f5c3/zerolog/journald"
 )
 
 func ExampleNewJournalDWriter() {
